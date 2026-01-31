@@ -22,6 +22,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
       - BRIDGE_SERVER_URL=http://bridge-server:8001
+      - NO_PROXY=bridge-server,localhost,127.0.0.1
+      - no_proxy=bridge-server,localhost,127.0.0.1
     restart: unless-stopped
     depends_on:
       bridge-server:
@@ -40,6 +42,11 @@ services:
     image: ghcr.io/suge2016/local-mcp-reverse-proxy-demo/bridge-client:latest
     environment:
       - BRIDGE_SERVER_URL=ws://bridge-server:8001/ws
+      - HTTP_PROXY=
+      - HTTPS_PROXY=
+      - http_proxy=
+      - https_proxy=
+      - NO_PROXY=*
     volumes:
       - ./sandbox:/app/sandbox
     restart: unless-stopped
