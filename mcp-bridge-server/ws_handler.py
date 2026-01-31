@@ -7,7 +7,7 @@ from typing import Dict, Any
 
 from fastapi import WebSocket, WebSocketDisconnect
 
-from registry import registry, ClientConnection
+from registry import registry
 
 logger = logging.getLogger(__name__)
 

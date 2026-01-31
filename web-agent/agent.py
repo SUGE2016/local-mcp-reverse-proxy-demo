@@ -1,7 +1,7 @@
 """Agent模块 - 智能体推理循环"""
 import json
 import logging
-from typing import Dict, Any, List, AsyncGenerator
+from typing import Dict, Any, AsyncGenerator
 
 from openai import AsyncOpenAI
 

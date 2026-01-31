@@ -1,7 +1,6 @@
 """MCP Bridge Client 入口"""
 import asyncio
 import logging
-import signal
 import sys
 from pathlib import Path
 

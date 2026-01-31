@@ -1,5 +1,4 @@
 """WebSocket客户端模块 - 连接远程bridge-server"""
-import asyncio
 import json
 import logging
 from typing import Dict, Any, List, Callable, Optional
