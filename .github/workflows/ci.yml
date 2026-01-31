@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+      
+      - name: Lint with ruff
+        run: |
+          ruff check mcp-bridge-server mcp-bridge-client web-agent
+
+  lint-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: web-frontend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: web-frontend
+        run: npm ci
+      
+      - name: Build
+        working-directory: web-frontend
+        run: npm run build
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build bridge-server image
+        run: docker build -t mcp-bridge-server ./mcp-bridge-server
+      
+      - name: Build bridge-client image
+        run: docker build -t mcp-bridge-client ./mcp-bridge-client
+      
+      - name: Build web-agent image
+        run: docker build -t web-agent ./web-agent
+      
+      - name: Build web-frontend image
+        run: docker build -t web-frontend ./web-frontend

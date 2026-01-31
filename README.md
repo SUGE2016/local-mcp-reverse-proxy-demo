@@ -38,7 +38,29 @@
 
 ## 快速开始
 
-### 1. 克隆并安装依赖
+### 方式一：Docker Compose（推荐）
+
+```bash
+# 克隆项目
+git clone https://github.com/your-username/local-mcp-reverse-proxy-demo.git
+cd local-mcp-reverse-proxy-demo
+
+# 配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，填入你的 API 配置
+
+# 启动远程服务（bridge-server, web-agent, web-frontend）
+docker compose up -d
+
+# 启动本地 bridge-client（可选，用于测试）
+docker compose --profile local up -d bridge-client
+```
+
+访问 http://localhost:3000
+
+### 方式二：本地开发
+
+#### 1. 克隆并安装依赖
 
 ```bash
 git clone https://github.com/your-username/local-mcp-reverse-proxy-demo.git
@@ -55,7 +77,7 @@ pip install fastapi uvicorn websockets mcp httpx openai python-dotenv
 cd web-frontend && npm install && cd ..
 ```
 
-### 2. 配置
+#### 2. 配置
 
 ```bash
 # 配置 LLM API（支持 OpenAI 兼容接口）
@@ -64,7 +86,7 @@ cp .env.example .env
 # 编辑 .env 文件，填入你的 API 配置
 ```
 
-### 3. 启动服务
+#### 3. 启动服务
 
 按以下顺序启动（每个命令在单独的终端中运行）：
 
@@ -85,7 +107,7 @@ cd web-agent && python main.py
 cd web-frontend && npm run dev
 ```
 
-### 4. 访问
+#### 4. 访问
 
 打开浏览器访问 http://localhost:3000
 
@@ -188,6 +210,45 @@ BRIDGE_SERVER_URL=http://localhost:8001
   ]
 }
 ```
+
+## Docker 部署
+
+### 单独构建镜像
+
+```bash
+# 构建所有镜像
+docker compose build
+
+# 或单独构建
+docker build -t mcp-bridge-server ./mcp-bridge-server
+docker build -t mcp-bridge-client ./mcp-bridge-client
+docker build -t web-agent ./web-agent
+docker build -t web-frontend ./web-frontend
+```
+
+### 生产部署
+
+远程服务器部署 bridge-server、web-agent、web-frontend：
+
+```bash
+docker compose up -d bridge-server web-agent web-frontend
+```
+
+本地运行 bridge-client 连接到远程：
+
+```bash
+# 修改 config.json 中的 bridge_server_url 为远程地址
+cd mcp-bridge-client
+python main.py
+```
+
+## CI/CD
+
+项目包含 GitHub Actions 配置（`.github/workflows/ci.yml`）：
+
+- Python 代码检查（ruff）
+- 前端构建检查
+- Docker 镜像构建测试
 
 ## License
 

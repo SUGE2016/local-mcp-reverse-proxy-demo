@@ -1,0 +1,45 @@
+services:
+  # 远程服务（云端部署）
+  bridge-server:
+    build: ./mcp-bridge-server
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  web-agent:
+    build: ./web-agent
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_URL=${OPENAI_API_URL:-https://api.openai.com/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - BRIDGE_SERVER_URL=http://bridge-server:8001
+    depends_on:
+      bridge-server:
+        condition: service_healthy
+
+  web-frontend:
+    build: ./web-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - web-agent
+
+  # 本地服务（本地运行，连接到远程 bridge-server）
+  # 注意：实际使用时，bridge-client 应在本地单独运行
+  bridge-client:
+    build: ./mcp-bridge-client
+    environment:
+      - BRIDGE_SERVER_URL=ws://bridge-server:8001/ws
+    volumes:
+      - ./mcp-bridge-client/sandbox:/app/sandbox
+    depends_on:
+      bridge-server:
+        condition: service_healthy
+    profiles:
+      - local  # 使用 --profile local 启动
