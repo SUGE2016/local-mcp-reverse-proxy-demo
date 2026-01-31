@@ -1,0 +1,11 @@
+{
+  "bridge_server_url": "ws://localhost:8001/ws",
+  "client_id": "local-client-1",
+  "servers": [
+    {
+      "name": "test",
+      "command": "python",
+      "args": ["simple_server.py"]
+    }
+  ]
+}
