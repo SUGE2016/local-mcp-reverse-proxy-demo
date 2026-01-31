@@ -1,0 +1,50 @@
+# 生产环境 - 从 GHCR 拉取镜像
+# 使用方式: docker compose -f docker-compose.prod.yml up -d
+
+services:
+  bridge-server:
+    image: ghcr.io/suge2016/local-mcp-reverse-proxy-demo/bridge-server:latest
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  web-agent:
+    image: ghcr.io/suge2016/local-mcp-reverse-proxy-demo/web-agent:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_URL=${OPENAI_API_URL:-https://api.openai.com/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - BRIDGE_SERVER_URL=http://bridge-server:8001
+    restart: unless-stopped
+    depends_on:
+      bridge-server:
+        condition: service_healthy
+
+  web-frontend:
+    image: ghcr.io/suge2016/local-mcp-reverse-proxy-demo/web-frontend:latest
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    depends_on:
+      - web-agent
+
+  # 本地 bridge-client（可选）
+  bridge-client:
+    image: ghcr.io/suge2016/local-mcp-reverse-proxy-demo/bridge-client:latest
+    environment:
+      - BRIDGE_SERVER_URL=ws://bridge-server:8001/ws
+    volumes:
+      - ./sandbox:/app/sandbox
+    restart: unless-stopped
+    depends_on:
+      bridge-server:
+        condition: service_healthy
+    profiles:
+      - local
