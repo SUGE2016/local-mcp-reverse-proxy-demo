@@ -43,14 +43,18 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       
+      - name: Get lowercase repo name
+        id: repo
+        run: echo "REPO=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+      
       - name: Build and push bridge-server
         uses: docker/build-push-action@v5
         with:
           context: ./mcp-bridge-server
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/bridge-server:${{ steps.version.outputs.VERSION }}
-            ghcr.io/${{ github.repository }}/bridge-server:latest
+            ghcr.io/${{ steps.repo.outputs.REPO }}/bridge-server:${{ steps.version.outputs.VERSION }}
+            ghcr.io/${{ steps.repo.outputs.REPO }}/bridge-server:latest
       
       - name: Build and push bridge-client
         uses: docker/build-push-action@v5
@@ -58,8 +62,8 @@ jobs:
           context: ./mcp-bridge-client
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/bridge-client:${{ steps.version.outputs.VERSION }}
-            ghcr.io/${{ github.repository }}/bridge-client:latest
+            ghcr.io/${{ steps.repo.outputs.REPO }}/bridge-client:${{ steps.version.outputs.VERSION }}
+            ghcr.io/${{ steps.repo.outputs.REPO }}/bridge-client:latest
       
       - name: Build and push web-agent
         uses: docker/build-push-action@v5
@@ -67,8 +71,8 @@ jobs:
           context: ./web-agent
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/web-agent:${{ steps.version.outputs.VERSION }}
-            ghcr.io/${{ github.repository }}/web-agent:latest
+            ghcr.io/${{ steps.repo.outputs.REPO }}/web-agent:${{ steps.version.outputs.VERSION }}
+            ghcr.io/${{ steps.repo.outputs.REPO }}/web-agent:latest
       
       - name: Build and push web-frontend
         uses: docker/build-push-action@v5
@@ -76,5 +80,5 @@ jobs:
           context: ./web-frontend
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/web-frontend:${{ steps.version.outputs.VERSION }}
-            ghcr.io/${{ github.repository }}/web-frontend:latest
+            ghcr.io/${{ steps.repo.outputs.REPO }}/web-frontend:${{ steps.version.outputs.VERSION }}
+            ghcr.io/${{ steps.repo.outputs.REPO }}/web-frontend:latest
